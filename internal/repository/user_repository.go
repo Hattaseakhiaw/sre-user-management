@@ -2,7 +2,8 @@ package repository
 
 import (
 	"database/sql"
-	"sre-user-management/backend/internal/models"
+
+	"github.com/Hattaseakhiaw/sre-user-management/backend/internal/models"
 )
 
 type UserRepository struct {

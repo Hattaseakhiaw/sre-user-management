@@ -1,9 +1,10 @@
 package services
 
 import (
-	"backend/internal/models"
-	"backend/internal/repository"
 	"errors"
+
+	"github.com/Hattaseakhiaw/sre-user-management/backend/internal/models"
+	"github.com/Hattaseakhiaw/sre-user-management/backend/internal/repository"
 
 	"golang.org/x/crypto/bcrypt"
 )

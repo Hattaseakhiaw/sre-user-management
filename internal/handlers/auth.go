@@ -1,9 +1,10 @@
 package handlers
 
 import (
-	"backend/internal/services"
 	"encoding/json"
 	"net/http"
+
+	"github.com/Hattaseakhiaw/sre-user-management/backend/internal/services"
 )
 
 type AuthHandler struct {
