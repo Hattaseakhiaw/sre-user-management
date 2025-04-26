@@ -1,3 +1,4 @@
+
 func SetupRoutes(mux *http.ServeMux, db *sql.DB) {
 	// ... healthz route
 

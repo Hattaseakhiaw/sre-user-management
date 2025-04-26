@@ -1,18 +1,31 @@
+package db
+
+import (
+	"fmt"
+	"log"
+
+	"github.com/Hattaseakhiaw/sre-user-management/backend/config"
+	"github.com/jmoiron/sqlx"
+	_ "github.com/lib/pq"
+)
+
 var DB *sqlx.DB
 
 func ConnectPostgres() error {
-	cfg := config.AppConfig
+	conf := config.AppConfig
 
-	dsn := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable",
-		cfg.DBHost, cfg.DBPort, cfg.DBUser, cfg.DBPassword, cfg.DBName,
+	connStr := fmt.Sprintf(
+		"host=%s port=%s user=%s password=%s dbname=%s sslmode=disable",
+		conf.DBHost, conf.DBPort, conf.DBUser, conf.DBPassword, conf.DBName,
 	)
 
-	db, err := sqlx.Connect("postgres", dsn)
+	var err error
+	DB, err = sqlx.Connect("postgres", connStr)
 	if err != nil {
 		return err
 	}
 
-	DB = db
+	log.Println("✅ Connected to PostgreSQL")
 	return nil
 }
 
