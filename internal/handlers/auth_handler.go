@@ -4,7 +4,7 @@ import (
 	"net/http"
 
 	"github.com/Hattaseakhiaw/sre-user-management/backend/internal/models"
-	"github.com/Hattaseakhiaw/sre-user-management/backend/internal/service"
+	service "github.com/Hattaseakhiaw/sre-user-management/backend/internal/services"
 	"github.com/gin-gonic/gin"
 )
 
