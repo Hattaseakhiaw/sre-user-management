@@ -1,34 +1,47 @@
 package main
 
 import (
-	"fmt"
 	"log"
 
 	"github.com/Hattaseakhiaw/sre-user-management/backend/config"
+	handler "github.com/Hattaseakhiaw/sre-user-management/backend/internal/handlers"
+	"github.com/Hattaseakhiaw/sre-user-management/backend/internal/repository"
+	service "github.com/Hattaseakhiaw/sre-user-management/backend/internal/services"
 	"github.com/Hattaseakhiaw/sre-user-management/backend/pkg/db"
 	"github.com/gin-gonic/gin"
 )
 
 func main() {
-	// Load ENV config
+	// Load config
 	config.LoadConfig()
 
 	// Connect to DB
 	if err := db.ConnectPostgres(); err != nil {
-		log.Fatal("❌ Failed to connect to DB:", err)
+		log.Fatal("Failed to connect to DB:", err)
 	}
-	fmt.Println("✅ Connected to PostgreSQL")
+	log.Println("✅ Connected to PostgreSQL")
 
-	// Start Gin HTTP server
-	router := gin.Default()
+	// Create Repository, Service, Handler
+	userRepo := repository.NewUserRepository(db.DB)
+	authService := service.NewAuthService(userRepo, []byte("your-secret-key"))
+	authHandler := handler.NewAuthHandler(authService)
 
-	// Health check endpoint
-	router.GET("/healthz", func(c *gin.Context) {
-		c.String(200, "OK")
+	// Setup Gin
+	r := gin.Default()
+
+	// Routes
+	r.GET("/healthz", func(c *gin.Context) {
+		c.JSON(200, gin.H{
+			"message": "OK",
+		})
 	})
 
+	// Auth Routes
+	r.POST("/register", authHandler.Register)
+	r.POST("/login", authHandler.Login)
+
 	// Start server
-	if err := router.Run(":8080"); err != nil {
-		log.Fatal("❌ Failed to start server:", err)
+	if err := r.Run(":8080"); err != nil {
+		log.Fatal("Failed to start server:", err)
 	}
 }
