@@ -1,29 +1,38 @@
 package repository
 
 import (
-	"database/sql"
-
 	"github.com/Hattaseakhiaw/sre-user-management/backend/internal/models"
+	"github.com/jmoiron/sqlx"
 )
 
-type UserRepository struct {
-	DB *sql.DB
+type UserRepository interface {
+	CreateUser(user *models.User) error
+	GetUserByEmail(email string) (*models.User, error)
 }
 
-func NewUserRepository(db *sql.DB) *UserRepository {
-	return &UserRepository{DB: db}
+type userRepository struct {
+	db *sqlx.DB
 }
 
-func (r *UserRepository) CreateUser(user *models.User) error {
-	query := `INSERT INTO users (email, password, name) VALUES ($1, $2, $3)`
-	_, err := r.DB.Exec(query, user.Email, user.Password, user.Name)
-	return err
+func NewUserRepository(db *sqlx.DB) UserRepository {
+	return &userRepository{db: db}
 }
 
-func (r *UserRepository) FindByEmail(email string) (*models.User, error) {
+func (r *userRepository) CreateUser(user *models.User) error {
+	query := `INSERT INTO users (username, email, password) 
+			  VALUES ($1, $2, $3) RETURNING id, created_at, updated_at`
+
+	return r.db.QueryRowx(query, user.Username, user.Email, user.Password).Scan(
+		&user.ID, &user.CreatedAt, &user.UpdatedAt,
+	)
+}
+
+func (r *userRepository) GetUserByEmail(email string) (*models.User, error) {
 	user := &models.User{}
-	row := r.DB.QueryRow(`SELECT id, email, password, name FROM users WHERE email=$1`, email)
-	err := row.Scan(&user.ID, &user.Email, &user.Password, &user.Name)
+	query := `SELECT id, username, email, password, created_at, updated_at
+			  FROM users WHERE email = $1`
+
+	err := r.db.Get(user, query, email)
 	if err != nil {
 		return nil, err
 	}
